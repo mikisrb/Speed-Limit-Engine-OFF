@@ -1,0 +1,143 @@
+
+SmecarApp.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000068  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  000000bc  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  000000bc  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000000ec  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000030  00000000  00000000  00000128  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000426  00000000  00000000  00000158  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 000003ab  00000000  00000000  0000057e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000243  00000000  00000000  00000929  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000044  00000000  00000000  00000b6c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    000002a7  00000000  00000000  00000bb0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000048  00000000  00000000  00000e57  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000020  00000000  00000000  00000e9f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	09 c0       	rjmp	.+18     	; 0x14 <__ctors_end>
+   2:	0e c0       	rjmp	.+28     	; 0x20 <__bad_interrupt>
+   4:	0d c0       	rjmp	.+26     	; 0x20 <__bad_interrupt>
+   6:	0c c0       	rjmp	.+24     	; 0x20 <__bad_interrupt>
+   8:	0b c0       	rjmp	.+22     	; 0x20 <__bad_interrupt>
+   a:	0a c0       	rjmp	.+20     	; 0x20 <__bad_interrupt>
+   c:	09 c0       	rjmp	.+18     	; 0x20 <__bad_interrupt>
+   e:	08 c0       	rjmp	.+16     	; 0x20 <__bad_interrupt>
+  10:	07 c0       	rjmp	.+14     	; 0x20 <__bad_interrupt>
+  12:	06 c0       	rjmp	.+12     	; 0x20 <__bad_interrupt>
+
+00000014 <__ctors_end>:
+  14:	11 24       	eor	r1, r1
+  16:	1f be       	out	0x3f, r1	; 63
+  18:	cf e9       	ldi	r28, 0x9F	; 159
+  1a:	cd bf       	out	0x3d, r28	; 61
+  1c:	20 d0       	rcall	.+64     	; 0x5e <main>
+  1e:	22 c0       	rjmp	.+68     	; 0x64 <_exit>
+
+00000020 <__bad_interrupt>:
+  20:	ef cf       	rjmp	.-34     	; 0x0 <__vectors>
+
+00000022 <Init>:
+		SpeedLimitEngineOFF();//proverava na kojim su pinovima signali prisutni i na osnovu njih radi dalje.
+	}
+}
+void Init()
+{
+	DDRB=0;
+  22:	17 ba       	out	0x17, r1	; 23
+	DDRB |= 1<<DDB2 | 1<<DDB1;//PINOVI 2 I 1 PORTA B SU OUTPUT
+  24:	87 b3       	in	r24, 0x17	; 23
+  26:	86 60       	ori	r24, 0x06	; 6
+  28:	87 bb       	out	0x17, r24	; 23
+	PORTB |= 1<<PORTB3 | 1<<PORTB4;//PINOVI 3 I 5 PORTA B SU INPUT I AKTIVIRAN IM JE PULLUP OTPORNIK
+  2a:	88 b3       	in	r24, 0x18	; 24
+  2c:	88 61       	ori	r24, 0x18	; 24
+  2e:	88 bb       	out	0x18, r24	; 24
+  30:	08 95       	ret
+
+00000032 <SpeedLimitEngineOFF>:
+}
+void SpeedLimitEngineOFF()
+{
+	if (!(PINB & USLOVSPEEDLIMIT))
+  32:	b3 99       	sbic	0x16, 3	; 22
+  34:	11 c0       	rjmp	.+34     	; 0x58 <__SREG__+0x19>
+	{
+		PORTB |= 1<<PORTB2;
+  36:	c2 9a       	sbi	0x18, 2	; 24
+		
+		if (!(PINB & USLOVENGINEOFF))
+  38:	86 b3       	in	r24, 0x16	; 22
+  3a:	88 71       	andi	r24, 0x18	; 24
+  3c:	59 f4       	brne	.+22     	; 0x54 <__SREG__+0x15>
+		{
+			PORTB |= 1<<PORTB1;
+  3e:	c1 9a       	sbi	0x18, 1	; 24
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  40:	2f ef       	ldi	r18, 0xFF	; 255
+  42:	8b e7       	ldi	r24, 0x7B	; 123
+  44:	92 e9       	ldi	r25, 0x92	; 146
+  46:	21 50       	subi	r18, 0x01	; 1
+  48:	80 40       	sbci	r24, 0x00	; 0
+  4a:	90 40       	sbci	r25, 0x00	; 0
+  4c:	e1 f7       	brne	.-8      	; 0x46 <__SREG__+0x7>
+  4e:	00 c0       	rjmp	.+0      	; 0x50 <__SREG__+0x11>
+  50:	00 00       	nop
+  52:	08 95       	ret
+			_delay_ms(5000);
+		}
+		else
+		{
+			PORTB &= ~(1<<PORTB1);
+  54:	c1 98       	cbi	0x18, 1	; 24
+  56:	08 95       	ret
+		}
+	}
+	else
+	{
+		PORTB &= ~(1<<PORTB2);
+  58:	c2 98       	cbi	0x18, 2	; 24
+		PORTB &= ~(1<<PORTB1);
+  5a:	c1 98       	cbi	0x18, 1	; 24
+  5c:	08 95       	ret
+
+0000005e <main>:
+
+void Init();
+void SpeedLimitEngineOFF();
+int main(void)
+{
+	Init();
+  5e:	e1 df       	rcall	.-62     	; 0x22 <Init>
+        while (1) 
+    {
+		SpeedLimitEngineOFF();//proverava na kojim su pinovima signali prisutni i na osnovu njih radi dalje.
+  60:	e8 df       	rcall	.-48     	; 0x32 <SpeedLimitEngineOFF>
+  62:	fe cf       	rjmp	.-4      	; 0x60 <main+0x2>
+
+00000064 <_exit>:
+  64:	f8 94       	cli
+
+00000066 <__stop_program>:
+  66:	ff cf       	rjmp	.-2      	; 0x66 <__stop_program>
